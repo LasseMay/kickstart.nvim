@@ -35,7 +35,7 @@ return {
       }
 
       -- setup must be called before loading
-      vim.cmd 'colorscheme kanso'
+      -- vim.cmd 'colorscheme kanso'
     end,
   },
   {
@@ -49,7 +49,7 @@ return {
     -- you can set set configuration options here
     config = function()
       vim.g.zenbones_darken_comments = 45
-      -- vim.cmd.colorscheme 'seoulbones'
+      vim.cmd.colorscheme 'seoulbones'
     end,
   },
   {
@@ -59,5 +59,12 @@ return {
     -- config = function()
     --   vim.cmd.colorscheme 'naysayer'
     -- end,
+  },
+  {
+    'savq/melange-nvim',
+
+    config = function()
+      -- vim.cmd.colorscheme 'melange'
+    end,
   },
 }

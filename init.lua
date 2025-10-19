@@ -91,6 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
+-- vim.g.have_nerd_font = true
 vim.g.have_nerd_font = false
 
 -- [[ Setting options ]]
@@ -102,7 +103,15 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
+
+-- fold settings
+vim.o.foldmethod = 'expr'
+vim.o.foldexpr = 'nvim_treesitter#foldexpr()'
+-- open all folds by default
+vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -207,17 +216,27 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 
 -- neovide
-if vim.g.neovide then
-  vim.o.guifont = 'Victor Mono'
-  vim.g.neovide_scale_factor = 1.0
+if vim.g.neovide == true then
+  -- vim.o.guifont = 'Victor Mono'
+  -- vim.g.neovide_scale_factor = 0.6
 
-  vim.keymap.set({ 'n', 'v' }, '<C-S-u>', function()
-    vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.1
-  end)
+  -- vim.keymap.set({ 'n', 'v' }, '<C-S-u>', function()
+  --   vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.1
+  -- end)
+  --
+  -- vim.keymap.set({ 'n', 'v' }, '<C-S-d>', function()
+  --   vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.1
+  -- end)
 
-  vim.keymap.set({ 'n', 'v' }, '<C-S-d>', function()
-    vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.1
-  end)
+  -- vim.api.nvim_set_keymap('n', '<A-=>', ':lua vim.g.neovide_scale_factor = math.min(vim.g.neovide_scale_factor + 0.1,  1.0)<CR>', { silent = true })
+  -- vim.api.nvim_set_keymap('n', '<A-->', ':lua vim.g.neovide_scale_factor = math.max(vim.g.neovide_scale_factor - 0.1,  0.1)<CR>', { silent = true })
+  -- vim.api.nvim_set_keymap('n', '<A-+>', ':lua vim.g.neovide_transparency = math.min(vim.g.neovide_transparency + 0.05, 1.0)<CR>', { silent = true })
+  -- vim.api.nvim_set_keymap('n', '<A-_>', ':lua vim.g.neovide_transparency = math.max(vim.g.neovide_transparency - 0.05, 0.0)<CR>', { silent = true })
+  -- vim.api.nvim_set_keymap('n', '<A-0>', ':lua vim.g.neovide_scale_factor = 0.5<CR>', { silent = true })
+  -- vim.api.nvim_set_keymap('n', '<A-)>', ':lua vim.g.neovide_transparency = 0.9<CR>', { silent = true })
+  --
+  -- vim.keymap.set({ 'n', 'x' }, '<C-S-C>', '"+y', { desc = 'Copy system clipboard' })
+  -- vim.keymap.set({ 'n', 'x' }, '<C-S-V>', '"+p', { desc = 'Paste system clipboard' })
 end
 
 -- [[ Basic Autocommands ]]
@@ -690,6 +709,7 @@ require('lazy').setup({
         -- gopls = {},
         pyright = {},
         rust_analyzer = {},
+        copilot = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -771,7 +791,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = { c = true, cpp = true, py = true }
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
@@ -785,7 +805,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         python = { 'isort', 'black' },
-        --
+        markdown = { 'prettierd', 'prettier' },
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
@@ -824,6 +844,7 @@ require('lazy').setup({
         opts = {},
       },
       'folke/lazydev.nvim',
+      'fang2hou/blink-copilot',
     },
     --- @module 'blink.cmp'
     --- @type blink.cmp.Config
@@ -871,17 +892,25 @@ require('lazy').setup({
 
       sources = {
         -- default = { 'lsp', 'path', 'snippets', 'lazydev' },
-        default = { 'minuet', 'lsp', 'path', 'snippets', 'lazydev' },
+        -- default = { 'minuet', 'lsp', 'path', 'snippets', 'lazydev', 'copilot' },
+        default = { 'lsp', 'path', 'snippets', 'lazydev', 'copilot' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
-          minuet = {
-            name = 'minuet',
-            module = 'minuet.blink',
+          -- minuet = {
+          --   name = 'minuet',
+          --   module = 'minuet.blink',
+          --   async = true,
+          --   -- Should match minuet.config.request_timeout * 1000,
+          --   -- since minuet.config.request_timeout is in seconds
+          --   timeout_ms = 3000,
+          --   score_offset = 100, -- Gives minuet higher priority among suggestions
+          -- },
+
+          copilot = {
+            name = 'copilot',
+            module = 'blink-copilot',
+            score_offset = 100,
             async = true,
-            -- Should match minuet.config.request_timeout * 1000,
-            -- since minuet.config.request_timeout is in seconds
-            timeout_ms = 3000,
-            score_offset = 100, -- Gives minuet higher priority among suggestions
           },
         },
       },
@@ -943,7 +972,18 @@ require('lazy').setup({
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
+
+      require('mini.surround').setup {
+        mappings = {
+          add = 'gsa', -- Add surrounding in Normal and Visual modes
+          delete = 'gsd', -- Delete surrounding
+          find = 'gsf', -- Find surrounding (to the right)
+          find_left = 'gsF', -- Find surrounding (to the left)
+          highlight = 'gsh', -- Highlight surrounding
+          replace = 'gsr', -- Replace surrounding
+          update_n_lines = 'gsn', -- Update `n_lines`
+        },
+      }
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
@@ -970,7 +1010,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'python', 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1001,9 +1041,9 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
@@ -1013,6 +1053,18 @@ require('lazy').setup({
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   { import = 'custom.plugins' },
 
+  -- pdflink handler
+  {
+    dir = '/Users/lasse/.config/nvim/my_plugins/pdflink_sioyek.nvim',
+    config = function()
+      require('pdflink_sioyek').setup {
+        -- binary = "sioyek",
+        -- extra_args = { "--some", "flag" },
+        map_gx = true,
+        verbose = true,
+      }
+    end,
+  },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
