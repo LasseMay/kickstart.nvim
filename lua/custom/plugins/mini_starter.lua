@@ -3,14 +3,33 @@ return {
   version = false,
   event = 'VimEnter',
   config = function()
+    local files = require 'mini.files'
     local starter = require 'mini.starter'
+
+    files.setup()
+
+    local function open_cwd()
+      files.open(nil, true)
+    end
+
+    local function open_buffer_dir()
+      local bufname = vim.api.nvim_buf_get_name(0)
+      if bufname == '' then
+        files.open(vim.loop.cwd(), true)
+      else
+        files.open(bufname, true)
+      end
+    end
+
+    vim.keymap.set('n', '-', open_cwd, { desc = 'Mini Files (cwd)', silent = true })
+    vim.keymap.set('n', '<leader>fm', open_buffer_dir, { desc = 'Mini Files (buffer dir)', silent = true })
 
     local logo = table.concat({
       " ___                                ",
       "/\\_ \\             __                ",
       "\\//\\ \\    __  __ /\\_\\    ___ ___    ",
       "  \\ \\ \\  /\\ \\/\\ \\\\/\\ \\ /' __` __`\\  ",
-      "   \\_\\ \\_\\ \\ \\_/ |\\ \\ \\/\\ \\/\\ \\/\\ \\ ",
+      "   \\_\\ \\_\\ \\ \\_/ |\\ \\ \\ \\/\\ \\/\\ \\/\\ \\ ",
       "   /\\____\\\\ \\___/  \\ \\_\\ \\_\\ \\_\\ \\_\\",
       "   \\/____/ \\/__/    \\/_/\\/_/\\/_/\\/_/",
     }, '\n')
