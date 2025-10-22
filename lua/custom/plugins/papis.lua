@@ -10,7 +10,7 @@ return {}
 --     -- "hrsh7th/nvim-cmp",
 --
 --     -- Choose one of the following two if not already installed:
---     -- "nvim-telescope/telescope.nvim",
+--     -- "ibhagwan/fzf-lua",
 --     -- "folke/snacks.nvim",
 --   },
 --   config = function()
