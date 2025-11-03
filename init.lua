@@ -804,6 +804,7 @@ require('lazy').setup({
       },
       'folke/lazydev.nvim',
       'fang2hou/blink-copilot',
+      'jghauser/papis.nvim',
     },
     --- @module 'blink.cmp'
     --- @type blink.cmp.Config
@@ -852,6 +853,9 @@ require('lazy').setup({
       sources = {
         -- default = { 'lsp', 'path', 'snippets', 'lazydev' },
         -- default = { 'minuet', 'lsp', 'path', 'snippets', 'lazydev', 'copilot' },
+        per_filetype = {
+          yaml = { 'papis' },
+        },
         default = { 'lsp', 'path', 'snippets', 'lazydev', 'copilot' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
@@ -888,28 +892,6 @@ require('lazy').setup({
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
     },
-  },
-
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
-      }
-
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      --   vim.cmd.colorscheme 'tokyonight-night'
-    end,
   },
 
   -- Highlight todo, notes, etc in comments
@@ -1013,17 +995,18 @@ require('lazy').setup({
   { import = 'custom.plugins' },
 
   -- pdflink handler
-  {
-    dir = '/Users/lasse/.config/nvim/my_plugins/pdflink_sioyek.nvim',
-    config = function()
-      require('pdflink_sioyek').setup {
-        -- binary = "sioyek",
-        -- extra_args = { "--some", "flag" },
-        map_gx = true,
-        verbose = true,
-      }
-    end,
-  },
+
+  -- {
+  --   dir = '/Users/lasse/.config/nvim/my_plugins/pdflink_sioyek.nvim',
+  --   config = function()
+  --     require('pdflink_sioyek').setup {
+  --       -- binary = "sioyek",
+  --       -- extra_args = { "--some", "flag" },
+  --       map_gx = true,
+  --       verbose = true,
+  --     }
+  --   end,
+  -- },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use fzf-lua!
@@ -1052,3 +1035,41 @@ require('lazy').setup({
 })
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+local handler = vim.fn.expand '~/.local/bin/pdflink-handler-sioyek'
+
+local function extract_pdflink_from_line(line, col)
+  local md = line:match '%b[]%((pdflink://[^)%s]+)%)'
+  if md then
+    return md
+  end
+  col = (col or 0) + 1
+  local last_start, i = nil, 1
+  while true do
+    local s = line:find('pdflink://', i, true)
+    if not s or s > col then
+      break
+    end
+    last_start = s
+    i = s + 1
+  end
+  if not last_start then
+    return nil
+  end
+  local rest = line:sub(last_start)
+  return rest:match '^(pdflink://[^%s%]%)}>,]+)'
+end
+
+local function open_current()
+  local line = vim.api.nvim_get_current_line()
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local col = pos[2]
+  local url = extract_pdflink_from_line(line, col) or vim.fn.expand '<cfile>'
+  if type(url) ~= 'string' or url == '' or not url:match '^pdflink://' then
+    return
+  end
+
+  vim.fn.jobstart({ handler, url }, { detach = true })
+  vim.notify('[pdflink] opened via external handler', vim.log.levels.INFO)
+end
+
+vim.keymap.set('n', 'gp', open_current, { desc = 'Open pdflink under cursor' })

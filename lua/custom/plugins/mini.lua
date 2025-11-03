@@ -25,13 +25,7 @@ return {
     vim.keymap.set('n', '<leader>fm', open_buffer_dir, { desc = 'Mini Files (buffer dir)', silent = true })
 
     local logo = table.concat({
-      " ___                                ",
-      "/\\_ \\             __                ",
-      "\\//\\ \\    __  __ /\\_\\    ___ ___    ",
-      "  \\ \\ \\  /\\ \\/\\ \\\\/\\ \\ /' __` __`\\  ",
-      "   \\_\\ \\_\\ \\ \\_/ |\\ \\ \\ \\/\\ \\/\\ \\/\\ \\ ",
-      "   /\\____\\\\ \\___/  \\ \\_\\ \\_\\ \\_\\ \\_\\",
-      "   \\/____/ \\/__/    \\/_/\\/_/\\/_/\\/_/",
+      'lvim',
     }, '\n')
 
     local fzf_section = function()

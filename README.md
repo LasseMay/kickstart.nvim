@@ -10,6 +10,19 @@ A starting point for Neovim that is:
 
 **NOT** a Neovim distribution, but instead a starting point for your configuration.
 
+## Custom Plugins
+
+This fork groups additional Lazy specs under `lua/custom/plugins`, with each file collecting related tools:
+
+- **Mini Suite** (`lua/custom/plugins/mini.lua`): loads `echasnovski/mini.nvim` starter and file browser when Neovim launches.
+- **Appearance** (`lua/custom/plugins/appearance.lua`): curates colorschemes (`webhooked/kanso.nvim`, `zenbones-theme/zenbones.nvim`, `RostislavArts/naysayer.nvim`, `savq/melange-nvim`) and focus mode with `folke/zen-mode.nvim`.
+- **Navigation** (`lua/custom/plugins/navigation.lua`): centralizes movement and project awareness via `folke/flash.nvim`, `stevearc/oil.nvim`, `hedyhli/outline.nvim`, and `nvim-treesitter/nvim-treesitter-context`.
+- **Writing** (`lua/custom/plugins/writing.lua`): provides markdown helpers (`MeanderingProgrammer/render-markdown.nvim`, `iamcco/markdown-preview.nvim`) and clipboard image paste support with `HakonHarnes/img-clip.nvim`.
+- **Productivity** (`lua/custom/plugins/productivity.lua`): bundles search/replace (`MagicDuck/grug-far.nvim`), table editing (`hat0uma/csvview.nvim`), and multi-language REPL management (`Vigemus/iron.nvim`).
+- **Integrations** (`lua/custom/plugins/integrations.lua`): wires up AI and tooling (`milanglacier/minuet-ai.nvim` with `saghen/blink.cmp`, `NickvanDyke/opencode.nvim`, `NeogitOrg/neogit`).
+
+A local helper under `my_plugins/pdflink_sioyek.nvim` is also loaded to bridge `gx` with Sioyek. Disabled experiments for later (`copilot.lua`, `orgmode.lua`, `papis.lua`, `quarto.lua`) remain in-place but return empty specs until configured.
+
 ## Installation
 
 ### Install Neovim
